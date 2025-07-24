@@ -1,7 +1,7 @@
-const SOURCE_COLUMN_TEMPLATE = 14; // O列 商品番号(型番)
+const SOURCE_COLUMN_TEMPLATE = 12; // M列 商品番号(型番)
 const SOURCE_COLUMN_FIRST_ORDER = 4; // E列 初回注文番号
-const TEMPLATE_URL_COLUMN = 12; // M列 テンプレートファイルai
-const FIRST_ORDER_URL_COLUMN = 13; // N列 初回注文が入ったフォルダ
+const TEMPLATE_URL_COLUMN = 10; // K列 テンプレートファイルai
+const FIRST_ORDER_URL_COLUMN = 11; // L列 初回注文が入ったフォルダ
 const START_ROW = 5; // データは6行目から
 const TEMPLATE_FOLDER_ID = '1350fFFcbHtZnIv6OtgJiGkYAJJ5qRaCP'; // テンプレートファイルの親フォルダID
 const FIRST_ORDER_FOLDER_IDS = [ // 初回注文フォルダ
@@ -34,8 +34,8 @@ function getUrl() {
     let actualDataEndRow = fullData.length; // actualDataEndRowは絶対行番号指定
     for (let i = fullData.length - 1; i >= START_ROW; i--) {
         let al_blank = true; //AからLがすべて空白
-        for (let j = 0; j <= 11; j++) { //L列のインデックスは11
-            //AからLまですべて空白であることをチェックする
+        for (let j = 0; j <= 9; j++) { //J列のインデックスは9
+            //AからJまですべて空白であることをチェックする
             if (fullData[i][j] != "") {
                 al_blank = false;
                 break; //セルが一つでも埋まっていたら、そこを最終行とみなす
@@ -46,7 +46,7 @@ function getUrl() {
             // インデックスiの行とそれより下の行はA-Lが空白
             // 絶対行番号actualDataEndRow（インデックスはi-1）はまだ空白かどうかわからない
         } else {
-            break; // A-Lに空白でない行が見つかったので、トリミングを停止
+            break; // A-Jに空白でない行が見つかったので、トリミングを停止
         }
     }
     // fullDataを実際のデータ終了行までトリムする
