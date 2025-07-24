@@ -44,7 +44,7 @@ function getUrl() {
         }
         if (al_blank) {
             actualDataEndRow = i;
-            // インデックスiの行とそれより下の行はA-Lが空白
+            // インデックスiの行とそれより下の行はA-MAX_COLUMN_INDEXが空白
             // 絶対行番号actualDataEndRow（インデックスはi-1）はまだ空白かどうかわからない
         } else {
             break; // 空白でない行が見つかったので、トリミングを停止
