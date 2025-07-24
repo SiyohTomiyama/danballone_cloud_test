@@ -3,6 +3,7 @@ const SOURCE_COLUMN_FIRST_ORDER = 4; // E列 初回注文番号
 const TEMPLATE_URL_COLUMN = 10; // K列 テンプレートファイルai
 const FIRST_ORDER_URL_COLUMN = 11; // L列 初回注文が入ったフォルダ
 const START_ROW = 5; // データは6行目から
+const MAX_COLUMN_INDEX = 9; // A列からこの列までが空だったら空白行とみなす
 const TEMPLATE_FOLDER_ID = '1350fFFcbHtZnIv6OtgJiGkYAJJ5qRaCP'; // テンプレートファイルの親フォルダID
 const FIRST_ORDER_FOLDER_IDS = [ // 初回注文フォルダ
     '1jVx_lxlsSkYC7_RaGxqBGKqn7ahe-M8f',  // 保管データ_2023.10.12以降
@@ -33,9 +34,9 @@ function getUrl() {
     //数式だけで値のないセルも付いてくるので、下の方の空白行はトリミングする
     let actualDataEndRow = fullData.length; // actualDataEndRowは絶対行番号指定
     for (let i = fullData.length - 1; i >= START_ROW; i--) {
-        let al_blank = true; //AからLがすべて空白
-        for (let j = 0; j <= 9; j++) { //J列のインデックスは9
-            //AからJまですべて空白であることをチェックする
+        let al_blank = true; //AからMAX_COLUMN_INDEXがすべて空白
+        for (let j = 0; j <= MAX_COLUMN_INDEX; j++) {
+            //AからMAX_COLUMN_INDEXまですべて空白であることをチェックする
             if (fullData[i][j] != "") {
                 al_blank = false;
                 break; //セルが一つでも埋まっていたら、そこを最終行とみなす
@@ -46,7 +47,7 @@ function getUrl() {
             // インデックスiの行とそれより下の行はA-Lが空白
             // 絶対行番号actualDataEndRow（インデックスはi-1）はまだ空白かどうかわからない
         } else {
-            break; // A-Jに空白でない行が見つかったので、トリミングを停止
+            break; // 空白でない行が見つかったので、トリミングを停止
         }
     }
     // fullDataを実際のデータ終了行までトリムする
