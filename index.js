@@ -4,7 +4,7 @@ const { google } = require("googleapis");
 // 書き込みたいスプレッドシートのID
 const SHEET_ID = "1eBE0a95f8GLgClXueZEbLILKmSqPR-37PGODoBfK7cg"; //本番
 const TARGET_SHEET_NAME = "進捗管理表"; // 操作したいシート名
-const KEYS = ["order_date", "submission_count", "check_due_at", "order_number", "first_order_number", "price", "product_category2_name", "product_name", "arrange_group_name", "arrange_group_name2", "template_number", "note"];
+const KEYS = ["order_date", "submission_count", "check_due_at", "order_number", "first_order_number", "price", "product_name", "arrange_group_name", "template_number", "note"];
 
 functions.http('appendSpreadSheetRow', async (req, res) => {
     const today = new Date();
