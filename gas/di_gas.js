@@ -3,7 +3,7 @@ const SOURCE_COLUMN_FIRST_ORDER = 4; // E列 初回注文番号
 const TEMPLATE_URL_COLUMN = 10; // K列 テンプレートファイルai
 const FIRST_ORDER_URL_COLUMN = 11; // L列 初回注文が入ったフォルダ
 const START_ROW = 5; // データは6行目から
-const MAX_COLUMN_INDEX = 9; // A列からこの列までが空だったら空白行とみなす
+const MAX_COLUMN_INDEX = 9; // A列からこのインデックスの列までが空だったら空白行とみなす
 const TEMPLATE_FOLDER_ID = '1350fFFcbHtZnIv6OtgJiGkYAJJ5qRaCP'; // テンプレートファイルの親フォルダID
 const FIRST_ORDER_FOLDER_IDS = [ // 初回注文フォルダ
     '1jVx_lxlsSkYC7_RaGxqBGKqn7ahe-M8f',  // 保管データ_2023.10.12以降
