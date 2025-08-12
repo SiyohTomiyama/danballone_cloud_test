@@ -28,8 +28,8 @@ function getUrl() {
     const sheet = SpreadsheetApp.getActiveSheet();
     const lastRow = sheet.getLastRow();
 
-    // N列までのデータを値として取得
-    let fullData = sheet.getRange(1, 1, lastRow, FIRST_ORDER_URL_COLUMN + 1).getValues();
+    // M列までのデータを値として取得
+    let fullData = sheet.getRange(1, 1, lastRow, SOURCE_COLUMN_TEMPLATE + 1).getValues();
 
     //数式だけで値のないセルも付いてくるので、下の方の空白行はトリミングする
     let actualDataEndRow = fullData.length; // actualDataEndRowは絶対行番号指定

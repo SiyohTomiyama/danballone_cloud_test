@@ -1,0 +1,41 @@
+# openapi2-functions.yaml
+swagger: '2.0'
+info:
+  title: PushOpsData
+  description: Push danballone Ops information to spreadsheet
+  version: 1.0.0
+schemes:
+- https
+produces:
+- application/json
+paths:
+  /push_ops_data:
+    get:
+      summary: PushOpsData
+      operationId: getOpsData
+      x-google-backend:
+        address: https://push-ops-data-1021179512470.asia-northeast1.run.app
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: A successful response
+          schema:
+            type: string
+    post:
+      summary: PushOpsData
+      operationId: postOpsData
+      x-google-backend:
+        address: https://push-ops-data-1021179512470.asia-northeast1.run.app
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: A successful response
+          schema:
+            type: string
+securityDefinitions:
+  api_key:
+    type: 'apiKey'
+    name: 'x-api-key'
+    in: 'header'
