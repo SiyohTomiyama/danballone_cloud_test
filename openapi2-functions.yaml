@@ -3,7 +3,7 @@ swagger: '2.0'
 info:
   title: PushOpsData
   description: Push danballone Ops information to spreadsheet
-  version: 1.0.0
+  version: 1.0.1
 schemes:
 - https
 produces:
@@ -34,6 +34,21 @@ paths:
           description: A successful response
           schema:
             type: string
+  /push_ops_data/health: # ヘルスチェック
+    get:
+      summary: Health check endpoint
+      operationId: getHealth
+      x-google-backend:
+        address: https://push-ops-data-1021179512470.asia-northeast1.run.app/health # エンドポイント
+      security: []
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
 securityDefinitions:
   api_key:
     type: 'apiKey'
