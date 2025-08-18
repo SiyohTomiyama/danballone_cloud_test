@@ -53,9 +53,6 @@ function getUrl() {
     // fullDataを実際のデータ終了行までトリムする
     fullData = fullData.slice(0, actualDataEndRow);
 
-    // 書き込み用の二次元配列を書き込む列数に合わせて初期化
-    let urlToWrite = Array(fullData.length).fill(null).map(() => Array(2).fill("")); //URL書き込み用
-
     for (let i = START_ROW; i < fullData.length; i++) {
         const originalSheetRow = i + 1; // ログがわかりやすいように絶対行番号を使う
         const rowData = fullData[i]; // 現在処理中の行データ
@@ -65,7 +62,9 @@ function getUrl() {
         let firstOrderUrl = rowData[FIRST_ORDER_URL_COLUMN] || "";
 
         // テンプレートファイル検索 (テンプレートファイル名があってURLがない場合のみ実行)
-        if (rowData[SOURCE_COLUMN_TEMPLATE] && !templateUrl) {
+        if (templateUrl == "" && String(rowData[SOURCE_COLUMN_TEMPLATE]) == "") {
+            templateUrl = "指定がありません";
+        } else if (rowData[SOURCE_COLUMN_TEMPLATE] && !templateUrl) {
             // ファイル名は完全一致検索
             const fullFileName = String(rowData[SOURCE_COLUMN_TEMPLATE]).trim();
             console.log(`Processing row ${originalSheetRow}. Searching for template file: "${fullFileName}"`);
@@ -82,7 +81,9 @@ function getUrl() {
         }
 
         // 初回注文フォルダ検索 (初回注文番号があってURLがない場合)
-        if (rowData[SOURCE_COLUMN_FIRST_ORDER] && !firstOrderUrl) {
+        if (firstOrderUrl == "" && String(rowData[SOURCE_COLUMN_FIRST_ORDER]) == "") {
+            firstOrderUrl = "指定がありません";
+        } else if (rowData[SOURCE_COLUMN_FIRST_ORDER] && !firstOrderUrl) {
             const folderNamePrefix = String(rowData[SOURCE_COLUMN_FIRST_ORDER]).trim(); // フォルダ名は部分一致
             console.log(`Processing row ${originalSheetRow}. Searching for first order folder: "${folderNamePrefix}"`);
 
@@ -105,13 +106,11 @@ function getUrl() {
             }
         }
 
-        // URL書き込み用の配列
-        urlToWrite[i] = [templateUrl, firstOrderUrl];
+        // 書き込むデータは現在の行のテンプレートURLと初回注文URLのみ
+        const dataToWrite = [[templateUrl, firstOrderUrl]];
+        // ユーザー体験をよくするためスプレッドシートに随時書き込む
+        writeDataValues(dataToWrite, originalSheetRow, TEMPLATE_URL_COLUMN + 1, 2);
     }
-
-    // スプレッドシートに書き込む
-    writeDataValues(urlToWrite, START_ROW + 1, TEMPLATE_URL_COLUMN + 1, 2);
-    SpreadsheetApp.flush(); // スプレッドシートへの変更を即時反映
 }
 
 // スプレッドシートに書き込む関数
@@ -120,13 +119,10 @@ function getUrl() {
 // targetColumn: 書き込み開始列
 // numColumn: 書き込む列数
 function writeDataValues(values, startRow, targetColumn, numColumn) {
-    // startRowより上のデータは捨てる
-    values = values.slice(startRow - 1);
     console.log("Writing values:", values);
     const sheet = SpreadsheetApp.getActiveSheet();
-
-    // getRange(行の開始, 列の開始, 行数, 列数)
     sheet.getRange(startRow, targetColumn, values.length, numColumn).setValues(values);
+    SpreadsheetApp.flush(); // 即時反映
 }
 
 // folderId: 検索対象の親フォルダID
