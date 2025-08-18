@@ -61,6 +61,11 @@ function getUrl() {
         let templateUrl = rowData[TEMPLATE_URL_COLUMN] || "";
         let firstOrderUrl = rowData[FIRST_ORDER_URL_COLUMN] || "";
 
+        if (templateUrl != "" && firstOrderUrl != "") {
+            //両方埋まっている行はスキップ
+            continue;
+        }
+
         // テンプレートファイル検索 (テンプレートファイル名があってURLがない場合のみ実行)
         if (templateUrl == "" && String(rowData[SOURCE_COLUMN_TEMPLATE]) == "") {
             templateUrl = "指定がありません";
