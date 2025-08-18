@@ -26,6 +26,7 @@ function onOpen() {
 function getUrl() {
     //準備
     const sheet = SpreadsheetApp.getActiveSheet();
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     const lastRow = sheet.getLastRow();
 
     // M列までのデータを値として取得
@@ -65,6 +66,9 @@ function getUrl() {
             //両方埋まっている行はスキップ
             continue;
         }
+
+        // toastを使って右下に進行状況を表示
+        spreadsheet.toast(`処理中... ${originalSheetRow} / ${fullData.length} 行目`, 'URL取得');
 
         // テンプレートファイル検索 (テンプレートファイル名があってURLがない場合のみ実行)
         if (templateUrl == "" && String(rowData[SOURCE_COLUMN_TEMPLATE]) == "") {
@@ -116,6 +120,8 @@ function getUrl() {
         // ユーザー体験をよくするためスプレッドシートに随時書き込む
         writeDataValues(dataToWrite, originalSheetRow, TEMPLATE_URL_COLUMN + 1, 2);
     }
+    // 処理完了後、最後のメッセージを表示
+    spreadsheet.toast('処理が完了しました。', '完了');
 }
 
 // スプレッドシートに書き込む関数
