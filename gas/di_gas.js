@@ -9,7 +9,7 @@ const FIRST_ORDER_FOLDER_IDS = [ // 初回注文フォルダ
     '1jVx_lxlsSkYC7_RaGxqBGKqn7ahe-M8f',  // 保管データ_2023.10.12以降
     '1gsg9Y5fBK9MwJ6Prvdjx1EayIfwrX3yY',  // == 2024/6/以前 （A式フルオーダー）==
     '1S-g742wTUXN7FDiR-SNfel_W1JUdKlQX', // == 2023/10/11以前（商品別）==
-    '0AOWcq-i71BUUUk9PVA'  // 2025年8月以降使う予定の初回注文フォルダ サブフォルダができてきたら、それぞれのIDにする
+    '0AOWcq-i71BUUUk9PVA'  // 2025年8月以降使う初回注文フォルダ サブフォルダができてきたら、それぞれのIDにする
 ];
 const BASE_URL_FILE = "https://drive.google.com/file/d/"; //ファイル用
 const BASE_URL_FOLDER = "https://drive.google.com/drive/folders/"; //フォルダ用
@@ -67,9 +67,6 @@ function getUrl() {
             continue;
         }
 
-        // toastを使って右下に進行状況を表示
-        spreadsheet.toast(`処理中... ${originalSheetRow} / ${fullData.length} 行目`, 'URL取得');
-
         // テンプレートファイル検索 (テンプレートファイル名があってURLがない場合のみ実行)
         if (templateUrl == "" && String(rowData[SOURCE_COLUMN_TEMPLATE]) == "") {
             templateUrl = "指定がありません";
@@ -78,11 +75,15 @@ function getUrl() {
             const fullFileName = String(rowData[SOURCE_COLUMN_TEMPLATE]).trim();
             console.log(`Processing row ${originalSheetRow}. Searching for template file: "${fullFileName}"`);
 
-            // 高速化のためDrive APIを使用してファイル検索
-            let file = searchDriveByApi(TEMPLATE_FOLDER_ID, fullFileName, false); // ファイル検索
+            // toastを使って右下に進行状況を表示
+            spreadsheet.toast(`${originalSheetRow}行目の${fullFileName}を検索中..`);
 
-            if (file) {
-                templateUrl = BASE_URL_FILE + file.id; // Drive APIの戻り値はid
+            // 高速化のためDrive APIを使用してファイル検索
+            if (fullFileName != "#N/A") {
+                let file = searchDriveByApi(TEMPLATE_FOLDER_ID, fullFileName, false); // ファイル検索
+                if (file) {
+                    templateUrl = BASE_URL_FILE + file.id; // Drive APIの戻り値はid
+                }
             } else {
                 templateUrl = "見つからないよ";
                 console.warn(`Template file "${fullFileName}" not found for row ${originalSheetRow}.`);
@@ -95,6 +96,8 @@ function getUrl() {
         } else if (rowData[SOURCE_COLUMN_FIRST_ORDER] && !firstOrderUrl) {
             const folderNamePrefix = String(rowData[SOURCE_COLUMN_FIRST_ORDER]).trim(); // フォルダ名は部分一致
             console.log(`Processing row ${originalSheetRow}. Searching for first order folder: "${folderNamePrefix}"`);
+
+            spreadsheet.toast(`${originalSheetRow}行目の${folderNamePrefix}を検索中..`);
 
             let folder = null;
             // フォルダIDの配列をループして検索
@@ -144,7 +147,8 @@ function searchDriveByApi(folderId, name, isFolderSearch) {
         const folder = DriveApp.getFolderById(folderId);
         switch (folderId) {
             case '1jVx_lxlsSkYC7_RaGxqBGKqn7ahe-M8f':
-                //保管データ_2023.10.12以降フォルダは第一階層しか見ない
+            case '0AOWcq-i71BUUUk9PVA':
+                //これらのフォルダは第一階層しか見ない
                 //第二階層まで見に行くと、数分の時間ロスになる
                 return searchItemsRecursiveApi(folder, name, isFolderSearch, false);
                 break;
