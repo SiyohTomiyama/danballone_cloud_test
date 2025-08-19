@@ -68,9 +68,11 @@ function getUrl() {
         }
 
         // テンプレートファイル検索 (テンプレートファイル名があってURLがない場合のみ実行)
-        if (templateUrl == "" && String(rowData[SOURCE_COLUMN_TEMPLATE]) == "") {
-            templateUrl = "指定がありません";
-        } else if (rowData[SOURCE_COLUMN_TEMPLATE] && !templateUrl) {
+        if (String(rowData[SOURCE_COLUMN_TEMPLATE]) == "") {
+            if (templateUrl == "") {
+                templateUrl = "指定がありません";
+            }
+        } else if (!templateUrl) {
             // ファイル名は完全一致検索
             const fullFileName = String(rowData[SOURCE_COLUMN_TEMPLATE]).trim();
             console.log(`Processing row ${originalSheetRow}. Searching for template file: "${fullFileName}"`);
@@ -91,9 +93,11 @@ function getUrl() {
         }
 
         // 初回注文フォルダ検索 (初回注文番号があってURLがない場合)
-        if (firstOrderUrl == "" && String(rowData[SOURCE_COLUMN_FIRST_ORDER]) == "") {
-            firstOrderUrl = "指定がありません";
-        } else if (rowData[SOURCE_COLUMN_FIRST_ORDER] && !firstOrderUrl) {
+        if (String(rowData[SOURCE_COLUMN_FIRST_ORDER]) == "") {
+            if (firstOrderUrl == "") {
+                firstOrderUrl = "指定がありません";
+            }
+        } else if (!firstOrderUrl) {
             const folderNamePrefix = String(rowData[SOURCE_COLUMN_FIRST_ORDER]).trim(); // フォルダ名は部分一致
             console.log(`Processing row ${originalSheetRow}. Searching for first order folder: "${folderNamePrefix}"`);
 
