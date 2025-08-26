@@ -9,7 +9,7 @@ const FIRST_ORDER_FOLDER_IDS = [ // 初回注文フォルダ
     '1jVx_lxlsSkYC7_RaGxqBGKqn7ahe-M8f',  // 保管データ_2023.10.12以降
     '1gsg9Y5fBK9MwJ6Prvdjx1EayIfwrX3yY',  // == 2024/6/以前 （A式フルオーダー）==
     '1S-g742wTUXN7FDiR-SNfel_W1JUdKlQX', // == 2023/10/11以前（商品別）==
-    '0AOWcq-i71BUUUk9PVA'  // 2025年8月以降使う予定の初回注文フォルダ サブフォルダができてきたら、それぞれのIDにする
+    '0AOWcq-i71BUUUk9PVA'  // 2025年8月以降使う初回注文フォルダ サブフォルダができてきたら、それぞれのIDにする
 ];
 const BASE_URL_FILE = "https://drive.google.com/file/d/"; //ファイル用
 const BASE_URL_FOLDER = "https://drive.google.com/drive/folders/"; //フォルダ用
@@ -26,6 +26,7 @@ function onOpen() {
 function getUrl() {
     //準備
     const sheet = SpreadsheetApp.getActiveSheet();
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     const lastRow = sheet.getLastRow();
 
     // M列までのデータを値として取得
@@ -53,9 +54,6 @@ function getUrl() {
     // fullDataを実際のデータ終了行までトリムする
     fullData = fullData.slice(0, actualDataEndRow);
 
-    // 書き込み用の二次元配列を書き込む列数に合わせて初期化
-    let urlToWrite = Array(fullData.length).fill(null).map(() => Array(2).fill("")); //URL書き込み用
-
     for (let i = START_ROW; i < fullData.length; i++) {
         const originalSheetRow = i + 1; // ログがわかりやすいように絶対行番号を使う
         const rowData = fullData[i]; // 現在処理中の行データ
@@ -64,17 +62,30 @@ function getUrl() {
         let templateUrl = rowData[TEMPLATE_URL_COLUMN] || "";
         let firstOrderUrl = rowData[FIRST_ORDER_URL_COLUMN] || "";
 
+        if (templateUrl != "" && firstOrderUrl != "") {
+            //両方埋まっている行はスキップ
+            continue;
+        }
+
         // テンプレートファイル検索 (テンプレートファイル名があってURLがない場合のみ実行)
-        if (rowData[SOURCE_COLUMN_TEMPLATE] && !templateUrl) {
+        if (String(rowData[SOURCE_COLUMN_TEMPLATE]) == "") {
+            if (templateUrl == "") {
+                templateUrl = "指定がありません";
+            }
+        } else if (!templateUrl) {
             // ファイル名は完全一致検索
             const fullFileName = String(rowData[SOURCE_COLUMN_TEMPLATE]).trim();
             console.log(`Processing row ${originalSheetRow}. Searching for template file: "${fullFileName}"`);
 
-            // 高速化のためDrive APIを使用してファイル検索
-            let file = searchDriveByApi(TEMPLATE_FOLDER_ID, fullFileName, false); // ファイル検索
+            // toastを使って右下に進行状況を表示
+            spreadsheet.toast(`${originalSheetRow}行目の${fullFileName}を検索中..`);
 
-            if (file) {
-                templateUrl = BASE_URL_FILE + file.id; // Drive APIの戻り値はid
+            // 高速化のためDrive APIを使用してファイル検索
+            if (fullFileName != "#N/A") {
+                let file = searchDriveByApi(TEMPLATE_FOLDER_ID, fullFileName, false); // ファイル検索
+                if (file) {
+                    templateUrl = BASE_URL_FILE + file.id; // Drive APIの戻り値はid
+                }
             } else {
                 templateUrl = "見つからないよ";
                 console.warn(`Template file "${fullFileName}" not found for row ${originalSheetRow}.`);
@@ -82,9 +93,15 @@ function getUrl() {
         }
 
         // 初回注文フォルダ検索 (初回注文番号があってURLがない場合)
-        if (rowData[SOURCE_COLUMN_FIRST_ORDER] && !firstOrderUrl) {
+        if (String(rowData[SOURCE_COLUMN_FIRST_ORDER]) == "") {
+            if (firstOrderUrl == "") {
+                firstOrderUrl = "指定がありません";
+            }
+        } else if (!firstOrderUrl) {
             const folderNamePrefix = String(rowData[SOURCE_COLUMN_FIRST_ORDER]).trim(); // フォルダ名は部分一致
             console.log(`Processing row ${originalSheetRow}. Searching for first order folder: "${folderNamePrefix}"`);
+
+            spreadsheet.toast(`${originalSheetRow}行目の${folderNamePrefix}を検索中..`);
 
             let folder = null;
             // フォルダIDの配列をループして検索
@@ -105,13 +122,13 @@ function getUrl() {
             }
         }
 
-        // URL書き込み用の配列
-        urlToWrite[i] = [templateUrl, firstOrderUrl];
+        // 書き込むデータは現在の行のテンプレートURLと初回注文URLのみ
+        const dataToWrite = [[templateUrl, firstOrderUrl]];
+        // ユーザー体験をよくするためスプレッドシートに随時書き込む
+        writeDataValues(dataToWrite, originalSheetRow, TEMPLATE_URL_COLUMN + 1, 2);
     }
-
-    // スプレッドシートに書き込む
-    writeDataValues(urlToWrite, START_ROW + 1, TEMPLATE_URL_COLUMN + 1, 2);
-    SpreadsheetApp.flush(); // スプレッドシートへの変更を即時反映
+    // 処理完了後、最後のメッセージを表示
+    spreadsheet.toast('処理が完了しました。', '完了');
 }
 
 // スプレッドシートに書き込む関数
@@ -120,13 +137,10 @@ function getUrl() {
 // targetColumn: 書き込み開始列
 // numColumn: 書き込む列数
 function writeDataValues(values, startRow, targetColumn, numColumn) {
-    // startRowより上のデータは捨てる
-    values = values.slice(startRow - 1);
     console.log("Writing values:", values);
     const sheet = SpreadsheetApp.getActiveSheet();
-
-    // getRange(行の開始, 列の開始, 行数, 列数)
     sheet.getRange(startRow, targetColumn, values.length, numColumn).setValues(values);
+    SpreadsheetApp.flush(); // 即時反映
 }
 
 // folderId: 検索対象の親フォルダID
@@ -137,7 +151,8 @@ function searchDriveByApi(folderId, name, isFolderSearch) {
         const folder = DriveApp.getFolderById(folderId);
         switch (folderId) {
             case '1jVx_lxlsSkYC7_RaGxqBGKqn7ahe-M8f':
-                //保管データ_2023.10.12以降フォルダは第一階層しか見ない
+            case '0AOWcq-i71BUUUk9PVA':
+                //これらのフォルダは第一階層しか見ない
                 //第二階層まで見に行くと、数分の時間ロスになる
                 return searchItemsRecursiveApi(folder, name, isFolderSearch, false);
                 break;
